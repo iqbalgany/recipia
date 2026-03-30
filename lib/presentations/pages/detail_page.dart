@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DetailRecipePage extends StatefulWidget {
@@ -12,7 +14,7 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: SingleChildScrollView(
         child: Stack(
           children: [
             Image.asset(
@@ -25,7 +27,7 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
               margin: EdgeInsets.only(
                 top: MediaQuery.sizeOf(context).height / 2.3,
               ),
-              padding: EdgeInsets.only(top: 30, left: 20),
+              padding: EdgeInsets.fromLTRB(20, 30, 20, 20),
               width: MediaQuery.sizeOf(context).width,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -41,8 +43,9 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
                       fontSize: 30,
                     ),
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 20),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Container(
                         padding: EdgeInsets.all(20),
@@ -52,34 +55,121 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
                         ),
                         child: Column(
                           children: [
-                            Icon(Icons.alarm, color: Colors.green, size: 50),
+                            SvgPicture.asset(
+                              'assets/images/alarm.svg',
+                              color: Colors.green,
+                              width: 50,
+                            ),
                             Text(
                               '40 MIN',
-                              style: TextStyle(color: Colors.green),
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 16,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(width: 20),
                       Container(
                         padding: EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade100,
+                          color: Colors.amber.shade100,
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Column(
                           children: [
-                            Text('😄', style: TextStyle(fontSize: 35)),
+                            SvgPicture.asset(
+                              'assets/images/smiley_medium.svg',
+                              width: 50,
+                            ),
                             Text(
                               'MEDIUM',
-                              style: TextStyle(color: Colors.green),
+                              style: TextStyle(
+                                color: Colors.amber.shade700,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade100,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Column(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/images/fire.svg',
+                              width: 50,
+                              color: Colors.red,
+                            ),
+                            Text(
+                              '100 cal',
+                              style: TextStyle(color: Colors.red, fontSize: 16),
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Ingredients :',
+                    style: GoogleFonts.fredoka(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    '1) 4 Big White Seeded Buns',
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+                  ),
+                  SizedBox(height: 5),
+                  SizedBox(height: 5),
+                  Text(
+                    '2) Unsalted Butter',
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    '2) American Cheese',
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    '4) Sweet Onion',
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Directions :',
+                    style: GoogleFonts.fredoka(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
+                    ),
+                  ),
+                  Text(
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc maximus erat vitae tortor accumsan ornare. Vestibulum sollicitudin interdum ornare. Vivamus ac varius metus. Cras eu erat dictum purus tempus sodales sed at tellus. Nulla tristique sagittis orci eget sagittis. Donec nec laoreet arcu. Proin in tempor enim, at egestas mauris. Aenean a sem feugiat, sollicitudin sapien sed, pretium lorem. Curabitur venenatis erat sit amet porta cursus.',
+                    textAlign: TextAlign.justify,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  ),
                 ],
+              ),
+            ),
+            Positioned(
+              top: 40,
+              left: 20,
+              child: IconButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll(Colors.white),
+                ),
+                onPressed: () {
+                  context.pop();
+                },
+                icon: Icon(Icons.arrow_back),
               ),
             ),
           ],

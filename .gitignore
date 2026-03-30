@@ -46,3 +46,9 @@ app.*.map.json
 
 # Firebase configuration files
 lib/firebase_options.dart
+
+# Firebase konfigurasi (Android)
+android/app/google-services.json
+
+# Jika Anda juga menggunakan iOS, tambahkan ini:
+ios/Runner/GoogleService-Info.plist

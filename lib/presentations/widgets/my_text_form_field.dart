@@ -6,6 +6,8 @@ class MyTextFormField extends StatelessWidget {
   final IconData? icon;
   final String? Function(String?)? validator;
   final bool obscureText;
+  final Color? fillColor;
+  final TextStyle? hintStyle;
   const MyTextFormField({
     super.key,
     this.controller,
@@ -13,6 +15,8 @@ class MyTextFormField extends StatelessWidget {
     this.icon,
     this.obscureText = false,
     this.validator,
+    this.fillColor = Colors.white,
+    this.hintStyle,
   });
 
   @override
@@ -23,12 +27,13 @@ class MyTextFormField extends StatelessWidget {
       validator: validator,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: fillColor,
         border: OutlineInputBorder(
           borderSide: BorderSide.none,
           borderRadius: BorderRadius.circular(10),
         ),
         hintText: hintText,
+        hintStyle: hintStyle,
         prefixIcon: Icon(icon, color: Colors.blue),
       ),
     );

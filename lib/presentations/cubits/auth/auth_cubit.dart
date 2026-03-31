@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -31,6 +32,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         state.copyWith(errorMessage: e.toString(), status: AuthStatus.failure),
       );
+      log(e.toString());
     }
   }
 
@@ -42,6 +44,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(
         state.copyWith(errorMessage: e.toString(), status: AuthStatus.failure),
       );
+      log(e.toString());
     }
   }
 

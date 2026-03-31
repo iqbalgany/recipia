@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recipia/constants/theme/colors.dart';
+import 'package:recipia/presentations/cubits/auth/auth_cubit.dart';
 import 'package:recipia/routing/app_router.dart';
 
 class HomePage extends StatelessWidget {
@@ -12,6 +14,20 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(onPressed: () {}, icon: Icon(Icons.menu)),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.push(AppRoutes.addRecipe);
+            },
+            icon: Icon(Icons.add_circle_outline),
+          ),
+          IconButton(
+            onPressed: () {
+              context.read<AuthCubit>().logout();
+            },
+            icon: Icon(Icons.logout_outlined),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

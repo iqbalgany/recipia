@@ -18,6 +18,8 @@ class AuthRemoteDatasource {
       return userCredential;
     } on FirebaseException catch (e) {
       throw e.message ?? 'An error occurred during login';
+    } catch (e) {
+      throw 'An unexpected error occurred';
     }
   }
 

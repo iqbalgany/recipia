@@ -7,14 +7,27 @@ part 'recipe_state.dart';
 
 class RecipeCubit extends Cubit<RecipeState> {
   final RecipeRemoteDatasource _datasource;
-  RecipeCubit(this._datasource) : super(const RecipeState());
+  RecipeCubit(this._datasource) : super(const RecipeState()) {
+    fetchAllRecipes();
+  }
 
   Future<void> fetchAllRecipes() async {
     emit(state.copyWith(status: RecipeStatus.loading));
     try {
-      final recipes = await _datasource.getAllRecipes();
+      final recipes = await Future.wait([
+        _datasource.getTodayRecipes(),
+        _datasource.getRecommendedRecipes(),
+        _datasource.getAllRecipes(),
+      ]);
 
-      emit(state.copyWith(recipes: recipes, status: RecipeStatus.success));
+      emit(
+        state.copyWith(
+          todayRecipes: recipes[0],
+          recommendedRecipes: recipes[1],
+          recipes: recipes[2],
+          status: RecipeStatus.success,
+        ),
+      );
     } catch (e) {
       emit(
         state.copyWith(

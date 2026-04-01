@@ -7,7 +7,10 @@ class RecipeRemoteDatasource {
 
   Future<void> addRecipe(RecipeModel recipe) async {
     try {
-      await _firestore.collection(_collection).add(recipe.toMap());
+      await _firestore
+          .collection(_collection)
+          .doc(recipe.id)
+          .set(recipe.toMap());
     } catch (e) {
       rethrow;
     }
@@ -18,7 +21,7 @@ class RecipeRemoteDatasource {
       final querySnapshot = await _firestore.collection(_collection).get();
 
       return querySnapshot.docs
-          .map((doc) => RecipeModel.fromMap(doc.id, doc.data()))
+          .map((doc) => RecipeModel.fromMap(doc.data()))
           .toList();
     } catch (e) {
       throw 'Failed to retrieve recipe data: $e';
@@ -33,12 +36,42 @@ class RecipeRemoteDatasource {
           .get();
 
       if (docSnapshot.exists) {
-        return RecipeModel.fromMap(docSnapshot.id, docSnapshot.data()!);
+        return RecipeModel.fromMap(docSnapshot.data()!);
       } else {
         throw 'Recipe not found';
       }
     } catch (e) {
       throw 'Failed to retrieve recipe details: $e';
+    }
+  }
+
+  Future<List<RecipeModel>> getTodayRecipes() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('isTodayRecipe', isEqualTo: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => RecipeModel.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      throw 'Failed to retrieve today\'s recipes: $e';
+    }
+  }
+
+  Future<List<RecipeModel>> getRecommendedRecipes() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('isRecommended', isEqualTo: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => RecipeModel.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      throw 'Failed to retrieve recommended recipes: $e';
     }
   }
 }

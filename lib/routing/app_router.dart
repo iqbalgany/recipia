@@ -11,11 +11,11 @@ import 'package:recipia/routing/go_router_refresh_stream.dart';
 class AppRoutes {
   static final authCubit = AuthCubit(AuthRemoteDatasource());
 
-  static final home = '/';
   static final onboard = '/onboard';
-  static final detailRecipe = '/detail-recipe';
   static final register = '/register';
+  static final home = '/';
   static final addRecipe = '/add-recipe';
+  static final detailRecipe = '/detail-recipe/:id';
 
   static final router = GoRouter(
     refreshListenable: GoRouterRefreshStream(authCubit.stream),
@@ -35,14 +35,34 @@ class AppRoutes {
     },
 
     routes: [
-      GoRoute(path: home, builder: (context, state) => HomePage()),
-      GoRoute(path: onboard, builder: (context, state) => OnboardPage()),
+      GoRoute(
+        path: home,
+        name: 'home',
+        builder: (context, state) => HomePage(),
+      ),
+      GoRoute(
+        path: onboard,
+        name: 'onboard',
+        builder: (context, state) => OnboardPage(),
+      ),
       GoRoute(
         path: detailRecipe,
-        builder: (context, state) => DetailRecipePage(),
+        name: 'detail-recipe',
+        builder: (context, state) {
+          final String recipeId = state.pathParameters['id']!;
+          return DetailRecipePage(recipeId: recipeId);
+        },
       ),
-      GoRoute(path: register, builder: (context, state) => AuthPage()),
-      GoRoute(path: addRecipe, builder: (context, state) => AddRecipePage()),
+      GoRoute(
+        path: register,
+        name: 'register',
+        builder: (context, state) => AuthPage(),
+      ),
+      GoRoute(
+        path: addRecipe,
+        name: 'add-recipe',
+        builder: (context, state) => AddRecipePage(),
+      ),
     ],
   );
 }

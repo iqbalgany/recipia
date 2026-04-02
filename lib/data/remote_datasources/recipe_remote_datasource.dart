@@ -1,16 +1,43 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:recipia/data/models/recipe_model.dart';
 
 class RecipeRemoteDatasource {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'recipes';
 
+  final _cloudinary = CloudinaryPublic(
+    'djsavcyie',
+    'recipia_preset',
+    cache: false,
+  );
+
   Future<void> addRecipe(RecipeModel recipe) async {
     try {
+      String finalImageUrl = recipe.imageUrl;
+
+      if (recipe.imageUrl.isNotEmpty && !recipe.imageUrl.startsWith('http')) {
+        final File fileToUpload = File(recipe.imageUrl);
+        if (await fileToUpload.exists()) {
+          CloudinaryResponse response = await _cloudinary.uploadFile(
+            CloudinaryFile.fromFile(
+              fileToUpload.path,
+              resourceType: CloudinaryResourceType.Image,
+            ),
+          );
+
+          finalImageUrl = response.secureUrl;
+        }
+      }
+
+      final updateRecipe = recipe.copyWith(imageUrl: finalImageUrl);
+
       await _firestore
           .collection(_collection)
-          .doc(recipe.id)
-          .set(recipe.toMap());
+          .doc(updateRecipe.id)
+          .set(updateRecipe.toMap());
     } catch (e) {
       rethrow;
     }
@@ -72,6 +99,22 @@ class RecipeRemoteDatasource {
           .toList();
     } catch (e) {
       throw 'Failed to retrieve recommended recipes: $e';
+    }
+  }
+
+  Future<List<RecipeModel>> searchRecipes(String query) async {
+    try {
+      final querySnapshot = await _firestore.collection(_collection).get();
+
+      return querySnapshot.docs
+          .map((doc) => RecipeModel.fromMap(doc.data()))
+          .where(
+            (recipe) =>
+                recipe.recipeName.toLowerCase().contains(query.toLowerCase()),
+          )
+          .toList();
+    } catch (e) {
+      throw 'Failed to search recipes: $e';
     }
   }
 }

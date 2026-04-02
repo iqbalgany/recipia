@@ -70,4 +70,29 @@ class RecipeCubit extends Cubit<RecipeState> {
       );
     }
   }
+
+  Future<void> searchRecipes(String query) async {
+    if (query.isEmpty) {
+      emit(state.copyWith(searchRecipes: []));
+    }
+
+    emit(state.copyWith(status: RecipeStatus.loading));
+    try {
+      final results = await _datasource.searchRecipes(query);
+      emit(
+        state.copyWith(status: RecipeStatus.success, searchRecipes: results),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: RecipeStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
+    }
+  }
+
+  void clearSearch() {
+    emit(state.copyWith(searchRecipes: [], status: RecipeStatus.success));
+  }
 }

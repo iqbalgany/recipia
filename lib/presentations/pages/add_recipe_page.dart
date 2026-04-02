@@ -110,6 +110,11 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                   child: Image.file(
                                     _imageFile!,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Text(
+                                        'Gambar tidak ditemukan',
+                                      );
+                                    },
                                   ),
                                 )
                               : Column(
@@ -291,6 +296,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
       return;
     }
 
+    if (!_formKey.currentState!.validate()) return;
+
     final newRecipe = RecipeModel(
       id: RecipeModel.generateId(),
       recipeName: _recipeNameController.text.trim(),
@@ -298,7 +305,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
       imageUrl: _imageFile!.path,
       isRecommended: _isRecommended,
       isTodayRecipe: _isTodayRecipe,
-      timeTaken: int.parse(_timeTakenController.text.trim()),
+      timeTaken: int.tryParse(_timeTakenController.text.trim()) ?? 0,
       ingredients: _ingredientsController.text.trim(),
       directions: _directionsController.text.trim(),
     );

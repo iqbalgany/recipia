@@ -7,6 +7,7 @@ class RecipeState extends Equatable {
   final List<RecipeModel> recipes;
   final List<RecipeModel> todayRecipes;
   final List<RecipeModel> recommendedRecipes;
+  final List<RecipeModel> searchRecipes;
   final RecipeModel? selectedRecipe;
   final RecipeStatus status;
   final String errorMessage;
@@ -14,6 +15,7 @@ class RecipeState extends Equatable {
     this.recipes = const [],
     this.todayRecipes = const [],
     this.recommendedRecipes = const [],
+    this.searchRecipes = const [],
     this.selectedRecipe,
     this.status = RecipeStatus.initial,
     this.errorMessage = '',
@@ -27,12 +29,14 @@ class RecipeState extends Equatable {
     todayRecipes,
     recommendedRecipes,
     errorMessage,
+    searchRecipes,
   ];
 
   RecipeState copyWith({
     List<RecipeModel>? recipes,
     List<RecipeModel>? todayRecipes,
     List<RecipeModel>? recommendedRecipes,
+    List<RecipeModel>? searchRecipes,
     RecipeModel? selectedRecipe,
     RecipeStatus? status,
     String? errorMessage,
@@ -41,6 +45,7 @@ class RecipeState extends Equatable {
       recipes: recipes ?? this.recipes,
       todayRecipes: todayRecipes ?? this.todayRecipes,
       recommendedRecipes: recommendedRecipes ?? this.recommendedRecipes,
+      searchRecipes: searchRecipes ?? this.searchRecipes,
       selectedRecipe: selectedRecipe ?? this.selectedRecipe,
       status: status ?? this.status,
       errorMessage: errorMessage ?? this.errorMessage,

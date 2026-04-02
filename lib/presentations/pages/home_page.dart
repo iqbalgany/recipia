@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,8 +10,23 @@ import 'package:recipia/presentations/cubits/auth/auth_cubit.dart';
 import 'package:recipia/presentations/cubits/recipe/recipe_cubit.dart';
 import 'package:recipia/routing/app_router.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debouce;
+
+  @override
+  void dispose() {
+    _debouce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +68,17 @@ class HomePage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 20, right: 20),
                   child: TextFormField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      if (_debouce?.isActive ?? false) _debouce!.cancel();
+                      _debouce = Timer(Duration(milliseconds: 1000), () {
+                        if (value.trim().isEmpty) {
+                          context.read<RecipeCubit>().clearSearch();
+                        } else {
+                          context.read<RecipeCubit>().searchRecipes(value);
+                        }
+                      });
+                    },
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       filled: true,
@@ -72,66 +98,98 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: Text(
-                    'Today Recipe',
-                    style: GoogleFonts.fredoka(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Container(
-                  height: 230,
-                  color: Color.fromARGB(1, 124, 120, 120),
-                  child: ListView.separated(
-                    itemCount: state.todayRecipes.length,
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    separatorBuilder: (context, index) => SizedBox(width: 20),
-                    itemBuilder: (context, index) => GestureDetector(
-                      onTap: () => context.pushNamed(
-                        'detail-recipe',
-                        pathParameters: {'id': state.todayRecipes[index].id},
-                      ),
-                      child: todayrRecipeCard(state.todayRecipes[index]),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: Text(
-                    'Recommended',
-                    style: GoogleFonts.fredoka(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
-                  child: ListView.separated(
+                if (state.status == RecipeStatus.loading) ...[
+                  Center(child: CircularProgressIndicator()),
+                ] else if (state.searchRecipes.isNotEmpty) ...[
+                  ListView.separated(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: state.recommendedRecipes.length,
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    itemCount: state.searchRecipes.length,
                     separatorBuilder: (context, index) => SizedBox(height: 15),
                     itemBuilder: (context, index) => GestureDetector(
-                      onTap: () => context.pushNamed(
-                        'detail-recipe',
-                        pathParameters: {
-                          'id': state.recommendedRecipes[index].id,
-                        },
-                      ),
-                      child: recommendedRecipeCard(
-                        state.recommendedRecipes[index],
+                      onTap: () async {
+                        await context.pushNamed(
+                          'detail-recipe',
+                          pathParameters: {'id': state.searchRecipes[index].id},
+                        );
+                        if (context.mounted) {
+                          context.read<RecipeCubit>().clearSearch();
+                          _searchController.clear();
+                        }
+                      },
+                      child: recommendedRecipeCard(state.searchRecipes[index]),
+                    ),
+                  ),
+                ] else ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    child: Text(
+                      'Today Recipe',
+                      style: GoogleFonts.fredoka(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: 10),
+                  SizedBox(height: 10),
+                  Container(
+                    height: 230,
+                    color: Color.fromARGB(1, 124, 120, 120),
+                    child: ListView.separated(
+                      itemCount: state.todayRecipes.length,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      separatorBuilder: (context, index) => SizedBox(width: 20),
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () => context.pushNamed(
+                            'detail-recipe',
+                            pathParameters: {
+                              'id': state.todayRecipes[index].id,
+                            },
+                          ),
+                          child: todayrRecipeCard(state.todayRecipes[index]),
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    child: Text(
+                      'Recommended',
+                      style: GoogleFonts.fredoka(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: state.recommendedRecipes.length,
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 15),
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () => context.pushNamed(
+                            'detail-recipe',
+                            pathParameters: {
+                              'id': state.recommendedRecipes[index].id,
+                            },
+                          ),
+                          child: recommendedRecipeCard(
+                            state.recommendedRecipes[index],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                ],
               ],
             ),
           );
@@ -152,59 +210,64 @@ class HomePage extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
-            child: Image.file(
-              File(recommendedRecipe.imageUrl),
+            child: Image.network(
+              recommendedRecipe.imageUrl,
+              errorBuilder: (context, error, stackTrace) {
+                return const Text('Gambar tidak ditemukan');
+              },
               width: 150,
               height: 150,
               fit: BoxFit.cover,
             ),
           ),
           SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                recommendedRecipe.recipeName,
-                style: GoogleFonts.fredoka(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              Text(
-                'By Iqbal Gany',
-                style: TextStyle(
-                  color: Color.fromARGB(120, 0, 0, 0),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-              ),
-              Row(
-                children: [
-                  Icon(Icons.alarm, color: Colors.green),
-                  SizedBox(width: 5),
-                  Text(
-                    '${recommendedRecipe.timeTaken} min',
-                    style: GoogleFonts.fredoka(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  recommendedRecipe.recipeName,
+                  style: GoogleFonts.fredoka(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
-                ],
-              ),
-              Row(
-                children: [
-                  Icon(Icons.book, color: Colors.green),
-                  SizedBox(width: 5),
-                  Text(
-                    recommendedRecipe.difficulty,
-                    style: GoogleFonts.fredoka(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                ),
+                Text(
+                  'By Iqbal Gany',
+                  style: TextStyle(
+                    color: Color.fromARGB(120, 0, 0, 0),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
                   ),
-                ],
-              ),
-            ],
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.alarm, color: Colors.green),
+                    SizedBox(width: 5),
+                    Text(
+                      '${recommendedRecipe.timeTaken} min',
+                      style: GoogleFonts.fredoka(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.book, color: Colors.green),
+                    SizedBox(width: 5),
+                    Text(
+                      recommendedRecipe.difficulty,
+                      style: GoogleFonts.fredoka(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -216,8 +279,11 @@ class HomePage extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(30),
-          child: Image.file(
-            File(todayRecipe.imageUrl),
+          child: Image.network(
+            todayRecipe.imageUrl,
+            errorBuilder: (context, error, stackTrace) {
+              return const Text('Gambar tidak ditemukan');
+            },
             fit: BoxFit.cover,
             height: 220,
             width: 200,

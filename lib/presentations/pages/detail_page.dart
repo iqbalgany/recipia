@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -46,8 +44,11 @@ class _DetailRecipePageState extends State<DetailRecipePage> {
           return SingleChildScrollView(
             child: Stack(
               children: [
-                Image.file(
-                  File(recipe.imageUrl),
+                Image.network(
+                  recipe.imageUrl,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Text('Gambar tidak ditemukan');
+                  },
                   fit: BoxFit.cover,
                   width: MediaQuery.sizeOf(context).width,
                   height: MediaQuery.sizeOf(context).height / 2,
